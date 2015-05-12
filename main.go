@@ -3,6 +3,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 )
@@ -10,9 +11,18 @@ import (
 const bufsize = 4096
 
 func main() {
+	appendopt := flag.Bool("append", false,
+		"Append the output to the files rather than overwriting them.")
+	flag.Parse()
 	out := []*os.File{os.Stdout}
+	fileflag := os.O_WRONLY | os.O_CREATE
+	if *appendopt {
+		fileflag |= os.O_APPEND
+	} else {
+		fileflag |= os.O_TRUNC
+	}
 	for _, path := range os.Args[1:] {
-		file, err := os.Create(path)
+		file, err := os.OpenFile(path, fileflag, 0666)
 		if err != nil {
 			log.Fatal(err)
 		}
