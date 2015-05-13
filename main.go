@@ -4,6 +4,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 )
@@ -11,17 +12,24 @@ import (
 const bufsize = 4096
 
 func main() {
-	appendopt := flag.Bool("append", false,
+	optappend := flag.Bool("append", false,
 		"Append the output to the files rather than overwriting them.")
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage: %s [-append] [path ...]\n", os.Args[0])
+		flag.PrintDefaults()
+		fmt.Fprintf(os.Stderr, "  path: Zero or more files to which to additionally copy standard in.\n")
+	}
 	flag.Parse()
+
+	// Open output files in addition to standard out.
 	out := []*os.File{os.Stdout}
 	fileflag := os.O_WRONLY | os.O_CREATE
-	if *appendopt {
+	if *optappend {
 		fileflag |= os.O_APPEND
 	} else {
 		fileflag |= os.O_TRUNC
 	}
-	for _, path := range os.Args[1:] {
+	for _, path := range flag.Args() {
 		file, err := os.OpenFile(path, fileflag, 0666)
 		if err != nil {
 			log.Fatal(err)
@@ -29,7 +37,11 @@ func main() {
 		defer file.Close()
 		out = append(out, file)
 	}
+
+	// Buffer for repeated reads on standard in.
 	buf := make([]byte, bufsize)
+
+	// Read from standard in (until eof), and copy data to output files.
 	for {
 		n, err := os.Stdin.Read(buf)
 		if err != nil {
