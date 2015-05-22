@@ -4,4 +4,4 @@ Little tee port to cut my teeth on Go.
 
 Installation
 ------------
-    go get github.com/pennello/tee
+    go get chrispennello.com/go/tee
