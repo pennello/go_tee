@@ -1,5 +1,12 @@
 // chris 051215 Simple tee implementation.
 
+// Tee reads data from standard in, copies it to standard out, and
+// additionally copies it to the zero or more paths specified as
+// command-line arguments.
+//
+//	Usage: tee [-append] [path ...]
+//	  -append=false: Append the output to the files rather than overwriting them.
+//	  path: Zero or more files to which to additionally copy standard in.
 package main
 
 import (
